@@ -13,9 +13,9 @@ class Boltzmann:
             / 1e5
         self.W = (self.W + self.W.T)
 
-        self.W = np.fill_diagonal(self.W, 0)
+        np.fill_diagonal(self.W, 0)
 
-        self.b = np.zeros(self.N)
+        self.bias = np.zeros(self.N)
 
         # Initial configuration
         self.config = np.random.choice([-1, 1], self.N)
@@ -41,4 +41,5 @@ class Boltzmann:
         self.self.visiting = np.roll(self.visiting, 2)
 
     def printSTUFF(self):
+        print "printing weights", self.W
         print "Printing self.config", self.config
