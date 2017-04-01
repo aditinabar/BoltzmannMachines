@@ -2,6 +2,7 @@
 """ Run the artificial neural network.
 """
 import Boltzmann
+import numpy as np
 # import network as nw
 # import plotting
 # import mlp_network
@@ -12,16 +13,32 @@ def run_Boltzmann():
     running the full experiments.
     """
     GBM = Boltzmann.Boltzmann()
-    GBM.printSTUFF()
-    GBM.sweep()
-    GBM.printSTUFF() 
+    W = np.random.random_integers(-1e5, 1e5, size=(GBM.N, GBM.N)) \
+        / 1e5
+    W = (W + W.T)
 
-    # net = nw.Network(32)
-    # net.build_model()
-    # net.training()
-    # net.predictions()
-    # net.gradient_terminal_weights()
+    np.fill_diagonal(W, 0)
 
+    W_2 = W / 10
+
+    weights = [W, W_2]
+
+    energy = []
+
+    for weight in weights:
+        for i in xrange(GBM.runs):
+            GBM.sweep(i, weight)
+            GBM.empiricalMean_bySweep(i)
+            GBM.refreshVisitingOrder()
+            if i > 30:
+                GBM.sweep(i, weight)
+                GBM.empiricalMean_bySweep(i)
+                GBM.refreshVisitingOrder()
+
+        GBM.differences_mean()
+        GBM.Total_energy(weight)
+        energy.append(GBM.Energies)
+    print "len(energy)", len(energy[0])
     print "Network() finished"
 
 
