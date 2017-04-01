@@ -4,7 +4,7 @@
 import Boltzmann
 import numpy as np
 # import network as nw
-# import plotting
+import plotting
 # import mlp_network
 
 
@@ -13,6 +13,8 @@ def run_Boltzmann():
     running the full experiments.
     """
     GBM = Boltzmann.Boltzmann()
+    plot = plotting.Plotting(GBM)
+
     W = np.random.random_integers(-1e5, 1e5, size=(GBM.N, GBM.N)) \
         / 1e5
     W = (W + W.T)
@@ -39,7 +41,12 @@ def run_Boltzmann():
         GBM.Total_energy(weight)
         energy.append(GBM.Energies)
     print "len(energy)", len(energy[0])
-    print "Network() finished"
+
+    print "energy[0]", energy[0]
+
+    plot.plot_energies(energy)
+
+    print "Boltzmann() finished"
 
 
 if __name__ == '__main__':

@@ -18,8 +18,8 @@ class Plotting(object):
 
     def __init__(self, network):
         self.__make_experiment_dir()
-        self.network = network
-        self.history = self.network.history
+        # self.network = network
+        # self.history = self.network.history
 
         # Configuration Variables
         self.opacity = 0.6
@@ -49,7 +49,7 @@ class Plotting(object):
 
     def plot_energies(self, energies):
         for i in range(len(energies)):
-            plt.hist(energies[i])
+            plt.hist(energies[i], bins=45)
             plt.title("Energies for weight matrix W_ij, part" + str(i + 1))
             plt.xlabel("Step number")
             plt.ylabel("Energy of configuration")
