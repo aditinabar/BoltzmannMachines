@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 """ Run the artificial neural network.
 """
+from keras.datasets import mnist
 import Boltzmann
 import numpy as np
-# import network as nw
 import plotting
-# import mlp_network
+import train_rbm as rbm
 
 
 def run_Boltzmann():
-    """ A function for running the network without
-    running the full experiments.
+    """ Runs the generic Boltzmann machine
     """
     GBM = Boltzmann.Boltzmann()
     plot = plotting.Plotting(GBM)
@@ -42,15 +41,32 @@ def run_Boltzmann():
         energy.append(GBM.Energies)
     print "len(energy)", len(energy[0])
 
-    print "energy[0]", energy[0]
-
     plot.plot_energies(energy)
 
     print "Boltzmann() finished"
 
 
+def load_mnist():
+    (x_train, x_train_lab), \
+        (x_test, x_test_lab) = mnist.load_data()
+    return x_train, x_train_lab, x_test, x_test_lab
+
+
+def run_rbm():
+    """ runs the Restricted Boltzmann Machine
+    """
+    x_train, x_train_lab, x_test, x_test_lab = load_mnist()
+
+    restricted = rbm.rbm_matlab(x_train)
+    restricted.images_to_vectors()
+    restricted.train_rbm()
+
+
+
+
 if __name__ == '__main__':
 
     print 'Started Program.'
-    run_Boltzmann()
+    # run_Boltzmann()
+    run_rbm()
     print "End of program"
