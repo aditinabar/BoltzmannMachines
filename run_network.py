@@ -57,11 +57,9 @@ def run_rbm():
     """
     x_train, x_train_lab, x_test, x_test_lab = load_mnist()
 
-    restricted = rbm.rbm_matlab(x_train)
+    restricted = rbm.rbm_matlab(x_train, x_test, x_train_lab, x_test_lab)
     restricted.images_to_vectors()
     restricted.train_rbm()
-
-
 
 
 if __name__ == '__main__':
