@@ -47,23 +47,27 @@ from __future__ import division
 % Maastricht University, 2007"""
 
 import numpy as np
-# from keras.datasets import mnist
-
+from datetime import datetime
 
 class rbm_matlab():
     """docstring for rbm_matlab"""
-    def __init__(self, X, X_test, Y=None, Y_test=None,
-                 h=20, activation='sigmoid', eta=0.1, max_iter=10):
+    def __init__(self, hidden=32):
 
+        self.h = hidden
+
+
+    def train_rbm(self, X, activation='sigmoid', eta=0.1, max_iter=30):
+        
         # Process inputs
         self.images = X
-        self.labels = Y
-        self.x_test = X_test
-        self.y_test = Y_test
-        self.h = h
         self.activation = activation
         self.eta = eta
         self.max_iter = max_iter
+
+        # Images to vectors
+        self.images = self.images.astype('float32') / 255
+        self.images = self.images.reshape((len(self.images),
+                                         np.prod(self.images.shape[1:])))
 
         # Important parameters
         self.initial_momentum = 0.5     # momentum for first five iterations
@@ -71,10 +75,9 @@ class rbm_matlab():
         self.weight_cost = 0.0002       # costs of weight update
 
         # Initialize some variables
-        print "images.shape", self.images.shape
         self.input_size = self.images.shape[0]
         self.visible_units = 784
-        self.batch_size = 300
+        self.batch_size = 500
         self.W = np.random.randn(self.visible_units, self.h) * 0.1
 
         # hidden units biases:
@@ -88,19 +91,8 @@ class rbm_matlab():
         self.deltaBias_upW = np.zeros((1, self.h))
         self.deltaBias_downW = np.zeros((1, self.visible_units))
 
-    def images_to_vectors(self):
-        """ We will normalize all values between 0 and 1 and we will
-        flatten the 28x28 images into vectors of size 784. """
-        self.images = self.images.astype('float32') / 255
-        self.x_test = self.x_test.astype('float32') / 255
-
-        self.images = self.images.reshape((len(self.images),
-                                         np.prod(self.images.shape[1:])))
-        self.x_test = self.x_test.reshape((len(self.x_test),
-                                           np.prod(self.x_test.shape[1:])))
-
-    def train_rbm(self):
-        print "initial weights: ", self.W[:10]
+        self.errors = []
+        # print "initial weights: ", self.W[:10]
 
         # Main loop
         for i in xrange(self.max_iter):
@@ -125,49 +117,51 @@ class rbm_matlab():
                 if batch + self.batch_size <= self.input_size:
 
                     # # Set values of visible nodes (= Gibbs sampling step 0)
-                    visible_1 = shuffled_Data[batch: min((batch +
-                                                         self.batch_size),
-                                                         self.input_size)]
+                    self.visible_1 = shuffled_Data[batch: min((batch +
+                                                               self.batch_size),
+                                                               self.input_size)]
 
                     # # Compute probabilities for hidden nodes
                     # (= Gibbs sampling step 0)
-                    hidden_1 = 1 / (1 + np.exp(-(np.dot(visible_1, self.W) +
-                                    np.tile(self.bias_upW,
-                                            [self.batch_size, 1]))))
+                    self.hidden_1 = self.sigmoid((np.dot(self.visible_1, self.W) +
+                                                  np.tile(self.bias_upW,
+                                                 [self.batch_size, 1])))
 
                     # # Compute probabilities for visible nodes
                     # (= Gibbs sampling step 1)
-                    visible_2 = 1 / (1 + np.exp(-(np.dot(hidden_1, self.W.T) +
-                                                  np.tile(self.bias_downW,
-                                                          [self.batch_size,
-                                                           1]))))
+                    self.visible_2 = self.sigmoid((np.dot(self.hidden_1,
+                                                              self.W.T) +
+                                                       np.tile(self.bias_downW,
+                                                               [self.batch_size,
+                                                                1])))
 
                     # # Compute probabilities for hidden nodes
                     # (= Gibbs sampling step 1)
                     if self.activation == 'sigmoid':
-                        hidden_2 = 1 / (1 + np.exp(-(np.dot(visible_2, self.W) +
-                                        np.tile(self.bias_upW,
-                                                [self.batch_size, 1]))))
+                        self.hidden_2 = self.sigmoid((np.dot(self.visible_2,
+                                                             self.W) +
+                                                      np.tile(self.bias_upW,
+                                                              [self.batch_size, 1])))
                     else:
-                        hidden_2 = visible_2 * self.W + np.tile(self.bias_upW,
+                        self.hidden_2 = np.dot(visible_2, self.W) + np.tile(self.bias_upW,
                                                                 [self.batch_size,
                                                                  1])
 
                     # # Now compute the weights update (contrastive divergence)
-                    positive_products = np.dot(hidden_1.T, visible_1)
-                    negative_products = np.dot(hidden_2.T, visible_2)
+                    positive_products = np.dot(self.hidden_1.T, self.visible_1)
+                    negative_products = np.dot(self.hidden_2.T, self.visible_2)
                     self.deltaW = (momentum * self.deltaW) +\
                                   (self.eta / self.batch_size) *\
                                   ((positive_products - negative_products).T -
                                    (self.weight_cost * self.W))
 
                     self.deltaBias_upW = (momentum * self.deltaBias_upW) +\
-                        (self.eta / self.batch_size) * (np.sum(hidden_1, 0) -
-                                                   np.sum(hidden_2, 0))
+                        (self.eta / self.batch_size) * (np.sum(self.hidden_1, 0) -
+                                                        np.sum(self.hidden_2, 0))
 
                     self.deltaBias_downW = momentum * self.deltaBias_downW +\
-                        (self.eta / self.batch_size) * (np.sum(visible_1, 0) -
-                                                   np.sum(visible_2, 0))
+                        (self.eta / self.batch_size) * (np.sum(self.visible_1, 0) -
+                                                        np.sum(self.visible_2, 0))
 
                     # # Divide by number of elements for linear activations
                     if self.activation != 'sigmoid':
@@ -184,7 +178,32 @@ class rbm_matlab():
                     self.W += self.deltaW
                     self.bias_upW += self.deltaBias_upW
                     self.bias_downW += self.deltaBias_downW
-        print "end weights:", self.W[:10]
+
+                    # compute the hidden cloud and reconstruction after each batch
+                    # start = datetime.now()
+                    # hidden, reconstruction = self.compute_hidden()
+                    # self.errors.append(self.rmse(self.images, reconstruction))
+                    # end = datetime.now()
+                    # print "run time", end - start
+
+    def sigmoid(self, X):
+        return 1 / (1 + np.exp(-X))
+
+        # H = sigmoid of WX + b using the learned W and b
+
+        # Z = sigmoid of W.T * H + b
+
+    def rmse(self, imgs, reconstruction):
+        return np.mean(np.sqrt(np.average((imgs - reconstruction) ** 2, axis=1)))
+
+    def compute_hidden(self):
+        hidden = self.sigmoid(np.dot(self.images, self.W) +
+            np.tile(self.bias_upW, [self.input_size, 1]))
+
+        reconstruction = self.sigmoid(np.dot(hidden, self.W.T) +
+            np.tile(self.bias_downW, [self.input_size, 1]))
+        return hidden, reconstruction
+
 
         # % Return RBM
         # machine.W = W
