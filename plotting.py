@@ -66,27 +66,38 @@ class Plotting(object):
             plt.savefig(path)
             plt.clf()
 
-# To be updated
-
-    def plot_pca(self, filepath='./Images/restrictedBM/', x_dimreduced=True):
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        #  target_names = [str(label) for label in xrange(10)]
-        #  hidden_cloud = self.network.get_hidden()
-        colors = sns.color_palette("Set2", 10)
-        for color, i in zip(colors, xrange(10)):
-            ax.scatter(x_dimreduced[self.net.x_train_lab == i, 0],
-                       x_dimreduced[self.net.x_train_lab == i, 1],
-                       x_dimreduced[self.net.x_train_lab == i, 2],
-                       c=color)
-        path = filepath + 'pca.png'
+    def plot_rmse(self, errors):
+        plt.plot(errors)
+        plt.ylabel('Root Mean Squared Error')
+        plt.xlabel('Batch number')
+        path = self.RBM + 'rmse.png'
         plt.draw()
         plt.savefig(path)
         plt.clf()
 
-
-
-
+    def plot_pca(self, dat, h, x_dimreduced=True):
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        #  target_names = [str(label) for label in xrange(10)]
+        #  hidden_cloud = self.network.get_hidden()
+        if dat == "x_train":
+            colors = sns.color_palette("Set2", 10)
+            for color, i in zip(colors, xrange(10)):
+                ax.scatter(x_dimreduced[self.net.x_train_lab == i, 0],
+                           x_dimreduced[self.net.x_train_lab == i, 1],
+                           x_dimreduced[self.net.x_train_lab == i, 2],
+                           c=color)
+        elif dat == "x_test":
+            colors = sns.color_palette("Set2", 10)
+            for color, i in zip(colors, xrange(10)):
+                ax.scatter(x_dimreduced[self.net.x_test_lab == i, 0],
+                           x_dimreduced[self.net.x_test_lab == i, 1],
+                           x_dimreduced[self.net.x_test_lab == i, 2],
+                           c=color)
+        path = self.RBM + dat + '_pca' + str(h) + '.png'
+        plt.draw()
+        plt.savefig(path)
+        plt.clf()
 
 
 
