@@ -56,7 +56,7 @@ class rbm_matlab():
         self.h = hidden
 
 
-    def train_rbm(self, X, activation='sigmoid', eta=0.1, max_iter=30):
+    def train_rbm(self, X, activation='sigmoid', eta=0.1, max_iter=1):
         
         # Process inputs
         self.images = X
@@ -180,11 +180,11 @@ class rbm_matlab():
                     self.bias_downW += self.deltaBias_downW
 
                     # compute the hidden cloud and reconstruction after each batch
-                    # start = datetime.now()
-                    # hidden, reconstruction = self.compute_hidden()
-                    # self.errors.append(self.rmse(self.images, reconstruction))
-                    # end = datetime.now()
-                    # print "run time", end - start
+                    start = datetime.now()
+                    hidden, reconstruction = self.compute_hidden()
+                    self.errors.append(self.rmse(self.images, reconstruction))
+                    end = datetime.now()
+                    print "run time", end - start
 
     def sigmoid(self, X):
         return 1 / (1 + np.exp(-X))
