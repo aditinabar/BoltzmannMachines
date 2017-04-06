@@ -119,10 +119,8 @@
 
 
 \begin{document}
-\title{23 February 2017 Lecture: Learning Rules for Boltzmann Machines}
-\author{Messina, Patrick\ 
-	\and
-	 Nabar, Aditi}
+\title{Project 3: Generic Boltzmann Machines and Restricted Boltzmann Machines}
+\author{Nabar, Aditi}
 
 \date{\today}
 
@@ -258,7 +256,6 @@
 \section{Fast RBMs}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 	The algorithm used for the fast restricted Boltzmann machine is as follows. 
 	The input data is broken into batches, which are fed into the machine as 
 	visible units $visible_1$. These visible units are then passed into the logistic 
@@ -271,19 +268,52 @@
 	but $visible_2$ is the desired reconstruction, after epochs 
 	of training.
 	
-	The RMSE(W*) for the entire training data was found to be 1.10455, and the 
-	corresponding observed RMSE for the whole test data was 0.81764. I am quite surprised that the 
+\subsubsection{Root Mean Squared Error}
+
 	
-	Due to lack of time and computational power, I was unable to compute the RMSE
-	per batch. 
+	The goal of a restricted Boltzmann machine is to learn from the data, and
+	with high accuracy, be able to reconstruct the input data itself.  The root 
+	mean squared error (RMSE) can be computed to analyze how closely the 
+	reconstruction matches the data it is approximating, the input data. 
+	There are a number of steps involved before computing the root mean squared 
+	error. First, the hidden cloud must be explicitly computed by passing the 
+	images in the batch $X_{batch}$, and their associated weights $W$, and 
+	biases $b_h$, through the sigmoid activation function.
+	  \[
+    	\sigma_{hidden} = \frac{1}{1 + e^{-(W\cdot X_{batch} + b_h)}}
+    \]
+    
+    The hidden cloud then is passed back through the sigmoid function, with 
+    the transpose of the weights $W$, and the bias of the visible units $b_v$
+    to obtain a reconstruction of the input data $recon$. This reconstruction is then 		passed into the root mean squared error to provide a RMSE per batch.
+    
+	  \[
+    	\sigma_{recon} = \frac{1}{1 + e^{-(W^T\cdot \sigma_{hidden} + b_v)}}
+    \] 
+
+	The restricted Boltzmann machine was run for 70 epochs, and the RMSE was
+	computed at the end of every 20th batch, for both the training set and the 
+	test set. 
+	
+	
+	\graphicspath{ {../Images/restrictedBM/} }
+	\begin{center}
+ 	\includegraphics[width=.5\textwidth]{x_trainrmse32.png}\hfill
+  	\includegraphics[width=.5\textwidth]{x_trainrmse64.png}
+	\end{center}
+	
+	The RMSE(W*) for the entire training data was found to be 1.01050, and the 
+	corresponding observed RMSE for the whole test data was 0.78802. It is 
+	interesting that the RMSE for the test data was found to be lower 
+	than that of the training data.
 	
 	
 \subsubsection{Options for Initializing Weights}
 
-	The following are options presented by \textit{Keras} for initializing the weights used 
-	by a neural network.
-	For the purposes of this project, the weight options were not that significant, as we were
-	tasked with initializing the first layer of the multi-layer perceptron with weights trained 
+	The following are options presented by \textit{Keras} for initializing the 
+	weights used by a neural network. For the purposes of this project, the 
+	weight options were not that significant, as we were tasked with 
+	initializing the first layer of the multi-layer perceptron with weights trained 
 	by the restricted	Boltzmann machine. The second layer however was initialized by 
 	sampling from the normal distribution.
 	
@@ -349,8 +379,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \subsubsection{Software Output}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  We are able print the following performance measures: accuracy and loss. These measures can be printed
-  per batch and per epoch. Any other output is done after training.
+  We are able print the following performance measures: accuracy and loss. These 
+  measures can be printed per batch and per epoch. Any other output is done 
+  after training.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -403,11 +434,14 @@ Chollet, Fran\c{c}ois: Keras,
 
 \bibitem{NeuPy.com}
 NeuPy.com
-\\\texttt{https://neupy.com/2015/09/20/discrete\textunderscore hopfield\textunderscore network.html}
+\\\texttt{https://neupy.com/2015/09/20/discrete\textunderscore 
+hopfield\textunderscore network.html}
 
 \bibitem{Scholarpedia.org}
 Scholarpedia.org
-\\\texttt{http://www.scholarpedia.org/article/Boltzmann\textunderscore machine\# The\textunderscore stochastic\textunderscore dynamics\textunderscore of\textunderscore a\textunderscore Boltzmann\textunderscore machine}
+\\\texttt{http://www.scholarpedia.org/article/Boltzmann\textunderscore 
+machine\# The\textunderscore stochastic\textunderscore dynamics
+\textunderscore of\textunderscore a\textunderscore Boltzmann\textunderscore machine}
 
 \bibitem{DeepLearning.net}
 DeepLearning.net
