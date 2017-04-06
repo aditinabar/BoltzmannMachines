@@ -56,7 +56,7 @@ class rbm_matlab():
         self.h = hidden
 
 
-    def train_rbm(self, X, activation='sigmoid', eta=0.1, max_iter=1):
+    def train_rbm(self, X, dat=False, activation='sigmoid', eta=0.1, max_iter=70):
         
         # Process inputs
         self.images = X
@@ -111,8 +111,10 @@ class rbm_matlab():
             visitingOrder = np.random.randint(self.input_size,
                                               size=self.input_size)
             shuffled_Data = [self.images[i] for i in visitingOrder]
+            counter = 0
 
             for batch in np.arange(0, self.input_size, self.batch_size):
+                counter += 1
 
                 if batch + self.batch_size <= self.input_size:
 
@@ -179,12 +181,16 @@ class rbm_matlab():
                     self.bias_upW += self.deltaBias_upW
                     self.bias_downW += self.deltaBias_downW
 
+                    if dat and counter % 20 == 0:
                     # compute the hidden cloud and reconstruction after each batch
-                    start = datetime.now()
-                    hidden, reconstruction = self.compute_hidden()
-                    self.errors.append(self.rmse(self.images, reconstruction))
-                    end = datetime.now()
-                    print "run time", end - start
+                        start = datetime.now()
+                        temp = shuffled_Data[batch: min((batch +
+                                                        self.batch_size),
+                                                        self.input_size)]
+                        hidden, reconstruction = self.compute_hidden(temp)
+                        self.errors.append(self.rmse(temp, reconstruction))
+                        end = datetime.now()
+                        print "run time", end - start
 
     def sigmoid(self, X):
         return 1 / (1 + np.exp(-X))
@@ -196,22 +202,10 @@ class rbm_matlab():
     def rmse(self, imgs, reconstruction):
         return np.mean(np.sqrt(np.average((imgs - reconstruction) ** 2, axis=1)))
 
-    def compute_hidden(self):
-        hidden = self.sigmoid(np.dot(self.images, self.W) +
-            np.tile(self.bias_upW, [self.input_size, 1]))
+    def compute_hidden(self, data):
+        hidden = self.sigmoid(np.dot(data, self.W) +
+            np.tile(self.bias_upW, [len(data), 1]))
 
         reconstruction = self.sigmoid(np.dot(hidden, self.W.T) +
-            np.tile(self.bias_downW, [self.input_size, 1]))
+            np.tile(self.bias_downW, [len(data), 1]))
         return hidden, reconstruction
-
-
-        # % Return RBM
-        # machine.W = W
-        # machine.bias_upW = bias_upW
-        # machine.bias_downW = bias_downW
-        # machine.type = type
-
-        # machine.tied = 'yes'
-        # disp(' ')
-
-
